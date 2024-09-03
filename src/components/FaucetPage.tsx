@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -57,10 +58,16 @@ export default function FaucetPage({
       const url = "https://jetpack-web3-wallet-backend.onrender.com/wallet/airdrop-sol";
       const response = await axios.post(url, {public_key, amount});
       if(response?.status === 200){
-        alert("Successfully airdropped!");
+        toast.success("Success", {
+          description: `Successfully airdropped ${amount} SOL.`,
+          duration: 1500,
+        });
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Error", {
+        description: "Something went wrong!",
+        duration: 1500,
+      });
     }
     setLoading(false);
   }
