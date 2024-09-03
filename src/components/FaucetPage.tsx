@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,8 +23,8 @@ import {
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { useWallet } from "@solana/wallet-adapter-react";
+import axios from "axios";
 
 export default function FaucetPage({
   setNetwork,
@@ -34,7 +34,6 @@ export default function FaucetPage({
   network: any;
 }) {
   const wallet = useWallet();
-  const {connection} = useConnection();
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,24 +45,29 @@ export default function FaucetPage({
   const sendAirdropToUser = async () => {
     if(!wallet.publicKey && !address) return;
     setLoading(true);
-    let publicKey;
+    let public_key = "";
     
-    if(address?.length){
-      publicKey = new PublicKey(address);
+    if(wallet.publicKey){
+      public_key = wallet.publicKey.toString();
+    }else{
+      public_key = address;
     }
 
     try {
-      await connection.requestAirdrop(wallet.publicKey || publicKey!, amount * LAMPORTS_PER_SOL);
+      const url = "https://jetpack-web3-wallet-backend.onrender.com/wallet/airdrop-sol";
+      const response = await axios.post(url, {public_key, amount});
+      if(response?.status === 200){
+        alert("Successfully airdropped!");
+      }
     } catch (error) {
       console.log(error);
-      alert("Something went wrong!")
     }
     setLoading(false);
   }
   
   return (
     <>
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md absolute z-20">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
             Sol Faucet
